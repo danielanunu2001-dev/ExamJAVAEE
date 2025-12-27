@@ -1,0 +1,11 @@
+# PostgreSQL a new database a,d a new user with password.
+# CREATE DATABASE voyageconnect;
+# CREATE USER voyageconnect_user WITH PASSWORD 'user';
+# GRANT ALL PRIVILEGES ON DATABASE voyageconnect TO voyageconnect_user;
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/voyageconnect
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+
+# Flyway configuration
+spring.flyway.enabled=true
