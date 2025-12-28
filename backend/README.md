@@ -26,29 +26,67 @@ Le projet suit une structure Maven standard :
         └── java        # Code source des tests
 ```
 
-## Démarrage
+## Démarrage local (dev)
 
-Pour lancer le service backend, exécutez la commande suivante depuis le répertoire `backend/` :
+Le backend peut être démarré seul ou via `docker compose` depuis la racine du repo.
+
+Lancer avec Maven :
 
 ```bash
+cd backend
 mvn spring-boot:run
 ```
 
-Par défaut, le serveur démarre sur le port `8080`.
+Le service écoute par défaut sur le port `8080`.
 
-## Configuration
+Via Docker Compose (recommandé pour dev local) :
 
-Avant de lancer l'application pour la première fois, vous devez créer votre propre fichier de configuration local.
+```bash
+docker compose build backend
+docker compose up -d backend db
+```
 
-1.  **Copiez le fichier d'exemple :**
-    ```bash
-    cp src/main/resources/application.properties.example src/main/resources/application.properties
-    ```
-2.  **Modifiez `application.properties` :**
-    Ouvrez le nouveau fichier `src/main/resources/application.properties` et remplacez les placeholders (`your_username`, `your_password`, etc.) par vos informations d'identification de base de données PostgreSQL.
+## Configuration et variables d'environnement
 
-Ce fichier est ignoré par Git (`.gitignore`) pour garantir que vos informations sensibles ne soient jamais versionnées.
+- `app.jwt.secret` (ou `APP_JWT_SECRET`) : secret pour signer les JWT. **Doit être changé en production**.
+- `app.jwt.expire-ms` (ou `APP_JWT_EXPIRE_MS`) : temps d'expiration du token en millisecondes (par défaut 86400000).
+- `app.cookie.secure` (ou `APP_COOKIE_SECURE`) : si `true`, le cookie `VC_TOKEN` est marqué `Secure` (nécessite HTTPS).
+- `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` : connexion à PostgreSQL.
 
-## Endpoints de l'API
+Vous pouvez copier `src/main/resources/application.properties.example` en `application.properties` pour une configuration locale, mais en prod utilisez des variables d'environnement ou un gestionnaire de secrets.
 
-Une fois le service démarré, les endpoints de l'API seront disponibles sous le préfixe `/api/v1/`. La documentation complète de l'API sera fournie via Swagger/OpenAPI.
+## Endpoints importants
+
+- Auth:
+    - `POST /api/auth/register` — enregistrement utilisateur
+    - `POST /api/auth/login` — authentification (retourne cookie HttpOnly `VC_TOKEN`)
+    - `POST /api/auth/logout` — efface le cookie `VC_TOKEN`
+- Destinations (public):
+    - `GET /api/destinations` — recherche des destinations (exclut `deleted` et `inactive`)
+- Admin (nécessite rôle ADMIN via JWT):
+    - `GET /api/admin/destinations` — liste complète (inclut `deleted` flag)
+    - `POST /api/admin/destinations` — création
+    - `PUT /api/admin/destinations/{id}` — mise à jour
+    - `DELETE /api/admin/destinations/{id}` — soft-delete (`deleted=true`)
+    - `PATCH /api/admin/destinations/{id}/restore` — restore soft-delete
+    - `DELETE /api/admin/destinations/{id}/purge` — purge définitive (option `?force=true` pour supprimer bookings liés)
+
+## Base de données & migrations
+
+Les migrations Flyway sont dans `src/main/resources/db/migration`. Lors du démarrage, Flyway applique automatiquement les migrations.
+
+## Tests
+
+Exécuter les tests unitaires et d'intégration :
+
+```bash
+cd backend
+./mvnw test
+```
+
+## Production
+
+- Utilisez HTTPS et activez `APP_COOKIE_SECURE=true`.
+- Définissez `APP_JWT_SECRET` via votre système d'orchestration (Kubernetes secret, variable d'environnement CI/CD).
+- Ne laissez pas `SPRING_JPA_HIBERNATE_DDL_AUTO=update` en production sans audit—préférez des migrations contrôlées via Flyway.
+

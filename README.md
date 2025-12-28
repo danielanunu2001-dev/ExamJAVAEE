@@ -68,3 +68,54 @@ Quelques points importants pour une mise en production sécurisée :
     - avec `?force=true` → le backend supprime d'abord les bookings liés puis supprime la destination.
 
 Veillez à ne pas exposer `APP_JWT_SECRET` dans un dépôt public et à utiliser HTTPS + `APP_COOKIE_SECURE=true` en production.
+
+## Lancer l'application (Docker Compose) - développement
+
+1. Construire et démarrer les services (Postgres, backend, frontend) :
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+2. Vérifier que les services sont opérationnels :
+
+```bash
+docker compose ps
+```
+
+3. Frontend : http://localhost:3000
+4. Backend API : http://localhost:8080
+
+## Variables d'environnement importantes
+
+- `APP_JWT_SECRET` : secret JWT (à définir en production)
+- `APP_JWT_EXPIRE_MS` : durée de validité du token en ms
+- `APP_COOKIE_SECURE` : `true` pour forcer le cookie `VC_TOKEN` Secure (HTTPS requis)
+- `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` : connexion à Postgres
+
+Dans le fichier `docker-compose.yml` (dev) ces variables sont déjà définies mais **changez** `APP_JWT_SECRET` avant déploiement.
+
+## Créer un compte admin (dev rapide)
+
+1. Compte admin par défaut créé durant l'itération: email `admin@voyage.local` / mot de passe `Admin1234`.
+     - Si vous préférez créer un nouvel admin :
+         - Enregistrer un utilisateur via `POST /api/auth/register` puis promouvoir via la table `users` (SQL) ou en utilisant un endpoint admin existant si déjà connecté.
+
+## Tests end-to-end rapides
+
+Un script d'exemple est présent pour exécuter une suite E2E basique via curl et stocke le rapport dans `/tmp/e2e_report.txt` :
+
+```bash
+bash /tmp/run_e2e.sh
+cat /tmp/e2e_report.txt
+```
+
+## Mise en production (recommandations)
+
+- Ne pas stocker le secret JWT dans le dépôt ; utilisez un gestionnaire de secrets ou variables d'environnement CI/CD.
+- Servir le frontend via HTTPS (nginx/Cloud CDN) et activer `APP_COOKIE_SECURE=true`.
+- Utiliser une base de données managée ou sauvegardes régulières.
+- Ajouter une stratégie de rotation des secrets et politiques de sauvegarde.
+
+Pour toute aide sur le déploiement, je peux fournir des manifests Kubernetes ou des templates Terraform.
