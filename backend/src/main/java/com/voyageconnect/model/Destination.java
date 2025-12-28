@@ -1,6 +1,7 @@
 package com.voyageconnect.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,4 +27,10 @@ public class Destination {
 
     @Column(nullable = false)
     private String country;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

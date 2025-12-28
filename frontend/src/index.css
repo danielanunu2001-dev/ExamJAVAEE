@@ -15,3 +15,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Futuristic animated background and glassmorphism */
+html, body, #root {
+  height: 100%;
+}
+
+.vc-bg {
+  background: radial-gradient(1000px 400px at 10% 10%, rgba(99,102,241,0.12), transparent 8%),
+              radial-gradient(800px 300px at 90% 80%, rgba(56,189,248,0.08), transparent 10%),
+              linear-gradient(180deg, #05060a 0%, #08101a 60% );
+}
+
+.vc-glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.vc-neon {
+  box-shadow: 0 0 24px rgba(99,102,241,0.18), 0 0 48px rgba(99,102,241,0.08) inset;
+}
+
+.vc-hero-line {
+  height: 3px;
+  background: linear-gradient(90deg, rgba(99,102,241,0.9), rgba(56,189,248,0.6));
+  margin: 12px auto 0 auto;
+  width: 120px;
+  border-radius: 6px;
+}
+
+/* subtle floating animation for cards */
+@keyframes floaty { 0% { transform: translateY(0px);} 50% { transform: translateY(-6px);} 100% { transform: translateY(0px);} }
+.vc-float { animation: floaty 6s ease-in-out infinite; }
+

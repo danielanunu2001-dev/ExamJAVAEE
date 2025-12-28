@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: voyageconnect
+      POSTGRES_USER: vcuser
+      POSTGRES_PASSWORD: vcpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/voyageconnect
+      SPRING_DATASOURCE_USERNAME: vcuser
+      SPRING_DATASOURCE_PASSWORD: vcpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # JWT settings (override in production with a strong secret)
+      APP_JWT_SECRET: "change-me-to-a-strong-secret"
+      APP_JWT_EXPIRE_MS: 86400000
+      # Set to 'true' in production when serving over HTTPS to mark cookie Secure
+      APP_COOKIE_SECURE: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

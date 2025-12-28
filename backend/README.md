@@ -7,6 +7,7 @@ Ce répertoire contient le service backend pour l'application VoyageConnect. Il 
 -   **Framework**: Java 17, Spring Boot 3.x
 -   **Accès aux données**: Spring Data JPA
 -   **Sécurité**: Spring Security
+ -   **Docker**: `docker-compose.yml` fourni pour dev (Postgres + backend + frontend)
 -   **Base de données**: PostgreSQL (configurable via `application.properties`)
 -   **Tests**: JUnit 5, Mockito, H2 (pour les tests d'intégration)
 
