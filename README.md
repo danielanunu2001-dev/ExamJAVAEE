@@ -1,4 +1,4 @@
-# VoyageConnect (Refonte)
+# VoyageConnect 
 
 Ce dépôt contient la refonte complète du projet VoyageConnect, structuré en monorepo avec un backend moderne et une application frontend monopage (SPA).
 
