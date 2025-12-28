@@ -25,6 +25,8 @@ public class DestinationController {
                                     @RequestParam(required = false) String country) {
         List<Destination> all = destinationRepository.findAll();
         return all.stream()
+                .filter(d -> d.isActive())
+                .filter(d -> !d.isDeleted())
                 .filter(d -> name == null || d.getName().toLowerCase().contains(name.toLowerCase()))
                 .filter(d -> country == null || d.getCountry().equalsIgnoreCase(country))
                 .collect(Collectors.toList());

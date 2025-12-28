@@ -45,3 +45,26 @@ L'API sera accessible à l'adresse `http://localhost:8080`.
     ```
 
 L'application sera accessible à l'adresse `http://localhost:3000`.
+
+## Notes de déploiement & sécurité
+
+Quelques points importants pour une mise en production sécurisée :
+
+- Variables d'environnement (définies dans `docker-compose.yml` pour l'environnement de développement) :
+    - `APP_JWT_SECRET` : **obligatoire en production** — mettez une valeur secrète forte.
+    - `APP_JWT_EXPIRE_MS` : durée d'expiration du token JWT en millisecondes (ex. `86400000`).
+    - `APP_COOKIE_SECURE` : `true` pour marquer le cookie `VC_TOKEN` comme `Secure` (nécessite HTTPS).
+
+- Authentification : le backend utilise des JWT HMAC et émet un cookie HttpOnly `VC_TOKEN` lors du `POST /api/auth/login`. Utiliser `credentials: 'include'` côté frontend.
+
+- Logout : `POST /api/auth/logout` efface le cookie `VC_TOKEN` côté serveur.
+
+- Soft-delete : les destinations utilisent désormais un flag `deleted` (soft-delete). Les appels publics (`GET /api/destinations`) excluent les destinations `deleted` et `inactive`. L'admin peut :
+    - marquer une destination comme `deleted` via `DELETE /api/admin/destinations/{id}` (soft-delete),
+    - restaurer via `PATCH /api/admin/destinations/{id}/restore`.
+
+- Purge définitive : pour supprimer physiquement une destination, utiliser `DELETE /api/admin/destinations/{id}/purge`. Si des réservations (`bookings`) pointent sur la destination :
+    - sans `force` → réponse HTTP 409 (prévenir l'admin),
+    - avec `?force=true` → le backend supprime d'abord les bookings liés puis supprime la destination.
+
+Veillez à ne pas exposer `APP_JWT_SECRET` dans un dépôt public et à utiliser HTTPS + `APP_COOKIE_SECURE=true` en production.

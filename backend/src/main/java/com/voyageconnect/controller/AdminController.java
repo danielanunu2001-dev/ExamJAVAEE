@@ -20,10 +20,12 @@ public class AdminController {
 
     private final DestinationRepository destinationRepository;
     private final UserRepository userRepository;
+    private final com.voyageconnect.repository.BookingRepository bookingRepository;
 
-    public AdminController(DestinationRepository destinationRepository, UserRepository userRepository) {
+    public AdminController(DestinationRepository destinationRepository, UserRepository userRepository, com.voyageconnect.repository.BookingRepository bookingRepository) {
         this.destinationRepository = destinationRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     // Destinations management
@@ -58,8 +60,11 @@ public class AdminController {
     @DeleteMapping("/destinations/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteDestination(@PathVariable Long id) {
-        if (!destinationRepository.existsById(id)) return ResponseEntity.notFound().build();
-        destinationRepository.deleteById(id);
+        Optional<com.voyageconnect.model.Destination> opt = destinationRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        com.voyageconnect.model.Destination d = opt.get();
+        d.setDeleted(true);
+        destinationRepository.save(d);
         return ResponseEntity.noContent().build();
     }
 
@@ -73,6 +78,34 @@ public class AdminController {
         d.setActive(!suspend);
         destinationRepository.save(d);
         return ResponseEntity.ok(d);
+    }
+
+    @PatchMapping("/destinations/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> restoreDestination(@PathVariable Long id) {
+        Optional<Destination> opt = destinationRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        Destination d = opt.get();
+        d.setDeleted(false);
+        destinationRepository.save(d);
+        return ResponseEntity.ok(d);
+    }
+
+    @DeleteMapping("/destinations/{id}/purge")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ResponseEntity<?> purgeDestination(@PathVariable Long id, @RequestParam(required = false, defaultValue = "false") boolean force) {
+        Optional<Destination> opt = destinationRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        long refs = bookingRepository.countByDestinationId(id);
+        if (refs > 0 && !force) {
+            return ResponseEntity.status(409).body("Destination has bookings; set force=true to delete and remove related bookings");
+        }
+        if (refs > 0 && force) {
+            bookingRepository.deleteByDestinationId(id);
+        }
+        destinationRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Users management

@@ -33,4 +33,7 @@ public class Destination {
 
     @Column(nullable = false)
     private boolean active = true;
+    
+    @Column(nullable = false)
+    private boolean deleted = false;
 }
