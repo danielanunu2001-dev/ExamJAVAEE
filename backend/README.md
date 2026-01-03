@@ -1,53 +1,68 @@
-# Backend VoyageConnect
+# Backend - VoyageConnect API
 
-Ce répertoire contient le service backend pour l'application VoyageConnect. Il s'agit d'une application **Spring Boot** qui expose une **API RESTful** pour gérer toutes les opérations de l'application, telles que la gestion des utilisateurs, les réservations, les offres, etc.
+Bienvenue dans le backend de **VoyageConnect**. Ce service est une **API RESTful** construite avec **Spring Boot**, conçue pour être robuste, sécurisée et évolutive. Elle sert de cerveau à l'application VoyageConnect, gérant toutes les données et la logique métier.
+
+## Rôle de l'API
+
+L'API expose des endpoints pour gérer :
+
+-   L'authentification et l'autorisation des utilisateurs.
+-   Les opérations CRUD (Create, Read, Update, Delete) pour les destinations, les réservations, etc.
+-   La logique métier complexe liée aux processus de réservation.
 
 ## Stack Technique
 
--   **Framework**: Java 17, Spring Boot 3.x
--   **Accès aux données**: Spring Data JPA
--   **Sécurité**: Spring Security
--   **Base de données**: PostgreSQL (configurable via `application.properties`)
--   **Tests**: JUnit 5, Mockito, H2 (pour les tests d'intégration)
-
-## Structure du Projet
-
-Le projet suit une structure Maven standard :
-
-```
-.
-├── pom.xml         # Fichier de configuration Maven
-└── src
-    ├── main
-    │   ├── java        # Code source de l'application
-    │   └── resources   # Fichiers de configuration (ex: application.properties)
-    └── test
-        └── java        # Code source des tests
-```
+-   **Framework** : Java 17, Spring Boot 3.x
+-   **Sécurité** : Spring Security (avec support JWT à venir)
+-   **Accès aux Données** : Spring Data JPA / Hibernate
+-   **Base de Données** : PostgreSQL
+-   **Migrations** : Flyway
+-   **Tests** : JUnit 5, Mockito, Testcontainers
 
 ## Démarrage
 
-Pour lancer le service backend, exécutez la commande suivante depuis le répertoire `backend/` :
+### 1. Configuration de la Base de Données
+
+Ce projet utilise PostgreSQL. Avant de lancer l'application, assurez-vous d'avoir une instance PostgreSQL en cours d'exécution et d'avoir créé une base de données et un utilisateur dédiés.
+
+**Exemple de commandes SQL :**
+```sql
+CREATE DATABASE voyageconnect;
+CREATE USER voyageconnect_user WITH PASSWORD 'votre_mot_de_passe_securise';
+GRANT ALL PRIVILEGES ON DATABASE voyageconnect TO voyageconnect_user;
+```
+
+### 2. Fichier de Configuration Local
+
+Créez votre fichier de configuration local à partir de l'exemple fourni :
+
+```bash
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+```
+
+Modifiez ensuite `src/main/resources/application.properties` avec les informations de connexion de votre base de données. Ce fichier est ignoré par Git pour des raisons de sécurité.
+
+### 3. Lancer l'Application
+
+Une fois la configuration terminée, lancez le serveur depuis le répertoire `backend/` :
 
 ```bash
 mvn spring-boot:run
 ```
 
-Par défaut, le serveur démarre sur le port `8080`.
+Le serveur démarrera par défaut sur `http://localhost:8080`.
 
-## Configuration
+## Migrations de la Base de Données
 
-Avant de lancer l'application pour la première fois, vous devez créer votre propre fichier de configuration local.
+Les migrations du schéma de la base de données sont gérées par **Flyway**. Les scripts de migration sont situés dans `src/main/resources/db/migration`.
 
-1.  **Copiez le fichier d'exemple :**
-    ```bash
-    cp src/main/resources/application.properties.example src/main/resources/application.properties
-    ```
-2.  **Modifiez `application.properties` :**
-    Ouvrez le nouveau fichier `src/main/resources/application.properties` et remplacez les placeholders (`your_username`, `your_password`, etc.) par vos informations d'identification de base de données PostgreSQL.
+-   Flyway exécute automatiquement les nouveaux scripts de migration au démarrage de l'application.
+-   Les scripts sont nommés selon le format `V<VERSION>__<DESCRIPTION>.sql` (ex: `V1__create_initial_tables.sql`).
 
-Ce fichier est ignoré par Git (`.gitignore`) pour garantir que vos informations sensibles ne soient jamais versionnées.
+## Tests
 
-## Endpoints de l'API
+Pour lancer la suite de tests, qui utilise une base de données en mémoire H2 pour l'isolation, exécutez :
 
-Une fois le service démarré, les endpoints de l'API seront disponibles sous le préfixe `/api/v1/`. La documentation complète de l'API sera fournie via Swagger/OpenAPI.
+```bash
+mvn test
+```

@@ -1,46 +1,55 @@
-# Getting Started with Create React App
+# Frontend - VoyageConnect UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Bienvenue dans le frontend de **VoyageConnect**. Il s'agit d'une **application monopage (SPA)** moderne construite avec **React** et **TypeScript**, conçue pour offrir une expérience utilisateur fluide, rapide et responsive.
 
-## Available Scripts
+## Rôle de l'Application Frontend
 
-In the project directory, you can run:
+Cette application est l'interface utilisateur de VoyageConnect. Elle a pour responsabilités de :
+
+-   Présenter une interface utilisateur intuitive pour la recherche et la réservation de voyages.
+-   Communiquer avec l'API REST du backend pour récupérer et envoyer des données.
+-   Gérer l'état de l'application côté client (authentification, données de l'utilisateur, etc.).
+
+## Stack Technique
+
+-   **Framework** : React 18 avec Create React App
+-   **Langage** : TypeScript
+-   **Style** : Tailwind CSS
+-   **Routage** : React Router
+-   **Gestion d'État** : Zustand
+-   **Tests** : React Testing Library & Jest
+
+## Commandes du Projet
+
+Toutes les commandes suivantes doivent être exécutées depuis le répertoire `frontend/`.
+
+### `npm install`
+
+Installe toutes les dépendances nécessaires pour le projet. À exécuter avant de lancer l'application pour la première fois.
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Lance le serveur de développement en mode "watch". L'application se rechargera automatiquement après chaque modification.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Ouvre [http://localhost:3000](http://localhost:3000) pour la visualiser dans votre navigateur.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Lance la suite de tests avec Jest.
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Compile l'application pour la production dans le répertoire `build/`. Cette version est optimisée pour la performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Structure des Dossiers
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Nous suivons une structure de dossiers organisée pour faciliter la maintenance :
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+src/
+├── pages/          # Composants représentant des pages complètes (ex: HomePage, LoginPage)
+├── components/     # Composants réutilisables (ex: Button, Input, Card)
+├── services/       # Logique pour communiquer avec l'API backend
+├── store/          # Fichiers de configuration pour la gestion d'état (Zustand)
+└── styles/         # Fichiers CSS globaux ou de configuration
+```
