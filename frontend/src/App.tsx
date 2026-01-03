@@ -1,12 +1,14 @@
 import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   return (
-    <div className="text-center">
-      <h1 className="text-3xl font-bold underline">
-        VoyageConnect
-      </h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+    </Routes>
   );
 }
 
