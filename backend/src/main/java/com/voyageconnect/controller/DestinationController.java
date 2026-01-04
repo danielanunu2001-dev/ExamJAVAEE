@@ -1,31 +1,34 @@
 package com.voyageconnect.controller;
 
 import com.voyageconnect.model.Destination;
-import com.voyageconnect.service.DestinationService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.voyageconnect.repository.DestinationRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/destinations")
-@Tag(name = "Destinations", description = "Endpoints for browsing destinations")
-@SecurityRequirement(name = "bearerAuth")
 public class DestinationController {
 
-    private final DestinationService destinationService;
+    private final DestinationRepository destinationRepository;
 
-    public DestinationController(DestinationService destinationService) {
-        this.destinationService = destinationService;
+    public DestinationController(DestinationRepository destinationRepository) {
+        this.destinationRepository = destinationRepository;
     }
 
-    @Operation(summary = "Get all destinations")
     @GetMapping
-    public List<Destination> getAllDestinations() {
-        return destinationService.findAll();
+    public List<Destination> search(@RequestParam(required = false) String name,
+                                    @RequestParam(required = false) String country) {
+        List<Destination> all = destinationRepository.findAll();
+        return all.stream()
+                .filter(d -> d.isActive())
+                .filter(d -> !d.isDeleted())
+                .filter(d -> name == null || d.getName().toLowerCase().contains(name.toLowerCase()))
+                .filter(d -> country == null || d.getCountry().equalsIgnoreCase(country))
+                .collect(Collectors.toList());
     }
 }
