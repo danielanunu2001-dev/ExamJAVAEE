@@ -34,3 +34,4 @@ build/
 
 # Ignore local application properties file
 src/main/resources/application.properties
+backend.log
