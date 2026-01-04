@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const API_BASE = (process.env.REACT_APP_API_URL as string) ?? '';
 
-export default function Login({ onLogin }: { onLogin: (email: string) => void }) {
+export default function Login({ onLogin, onShowRegister }: { onLogin: (email: string) => void, onShowRegister: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
@@ -29,6 +29,7 @@ export default function Login({ onLogin }: { onLogin: (email: string) => void })
         <input placeholder="Mot de passe" type="password" value={password} onChange={e => setPassword(e.target.value)} className="p-2 rounded bg-transparent border border-white/6" />
         <div className="flex gap-2">
           <button className="px-3 py-2 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded" type="submit">Se connecter</button>
+          <button type="button" onClick={onShowRegister} className="px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded">S'inscrire</button>
         </div>
       </div>
       {msg && <div className="mt-2 text-sm text-amber-200">{msg}</div>}

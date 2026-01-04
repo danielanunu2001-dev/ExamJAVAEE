@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DestinationCard from './components/DestinationCard';
 import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 type Destination = { id: number; name: string; description?: string; country?: string };
 
@@ -12,19 +13,13 @@ function App() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [query, setQuery] = useState('');
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [authEmail, setAuthEmail] = useState(localStorage.getItem('vc_auth_email') || '');
   const API_BASE = (process.env.REACT_APP_API_URL as string) ?? '';
 
   useEffect(() => {
-    // if stored credentials exist, attempt to fetch destinations
-    if (email && password) fetchDestinations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function authHeader(): HeadersInit | undefined {
-    // legacy — not used when using cookie-based login
-    return undefined;
-  }
+    if (authEmail) fetchDestinations();
+  }, [authEmail]);
 
   async function fetchDestinations() {
     setMessage(null);
@@ -40,31 +35,6 @@ function App() {
     } catch (e) {
       setMessage('Erreur lors de la récupération des destinations.');
     }
-  }
-
-  async function register() {
-    setMessage(null);
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName: 'Client', lastName: 'User' }),
-      });
-      if (res.status === 201 || res.status === 200) {
-        setMessage('Inscription réussie — vous pouvez maintenant vous connecter.');
-      } else {
-        const txt = await res.text();
-        setMessage(`Erreur inscription: ${txt}`);
-      }
-    } catch (e) {
-      setMessage("Erreur lors de l'inscription.");
-    }
-  }
-
-  function saveCredentials() {
-    localStorage.setItem('vc_email', email);
-    localStorage.setItem('vc_pass', password);
-    setMessage('Identifiants enregistrés localement.');
   }
 
   async function book(destId: number) {
@@ -103,14 +73,18 @@ function App() {
             <div className="flex items-center gap-3">
             <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher..." className="px-3 py-2 rounded-md bg-white/6 placeholder:text-white/60" />
             <div className="text-sm text-white/70">{destinations.length} destinations</div>
-            {email && password && (
+            {authEmail && (
               <button className="ml-3 px-3 py-2 bg-amber-600 rounded" onClick={() => setShowAdmin(true)}>Admin</button>
             )}
           </div>
         </header>
 
         <section className="mb-6">
-          <Login onLogin={(em) => { setAuthEmail(em); localStorage.setItem('vc_auth_email', em); fetchDestinations(); }} />
+          {showRegister ? (
+            <Register onShowLogin={() => setShowRegister(false)} />
+          ) : (
+            <Login onLogin={(em) => { setAuthEmail(em); localStorage.setItem('vc_auth_email', em); fetchDestinations(); }} onShowRegister={() => setShowRegister(true)} />
+          )}
         </section>
 
         <section>
