@@ -1,7 +1,7 @@
 package com.voyageconnect.controller;
 
 import com.voyageconnect.model.Destination;
-import com.voyageconnect.service.interfaces.DestinationService;
+import com.voyageconnect.service.DestinationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
