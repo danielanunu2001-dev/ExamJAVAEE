@@ -2,14 +2,13 @@ package com.voyageconnect.controller;
 
 import com.voyageconnect.controller.dto.RegisterRequest;
 import com.voyageconnect.model.User;
-import com.voyageconnect.model.UserRole;
-import com.voyageconnect.repository.UserRepository;
+import com.voyageconnect.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
-import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,45 +19,44 @@ import com.voyageconnect.security.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Endpoints for user registration and login")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final long jwtExpireMs;
     private final boolean cookieSecure;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
+    public AuthController(UserService userService, AuthenticationManager authenticationManager,
                           @Value("${app.jwt.secret:dev-secret}") String jwtSecret,
                           @Value("${app.jwt.expire-ms:86400000}") long jwtExpireMs,
                           @Value("${app.cookie.secure:false}") boolean cookieSecure) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = new JwtUtil(jwtSecret, jwtExpireMs);
         this.jwtExpireMs = jwtExpireMs;
         this.cookieSecure = cookieSecure;
     }
 
+    @Operation(summary = "Register a new user", responses = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "409", description = "Email already in use")
+    })
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        if (userRepository.findByEmail(req.getEmail()).isPresent()) {
-            return ResponseEntity.status(409).body("Email already used");
+        try {
+            User saved = userService.register(req);
+            return ResponseEntity.created(URI.create("/api/users/" + saved.getId())).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
         }
-
-        User u = User.builder()
-                .email(req.getEmail())
-                .password(passwordEncoder.encode(req.getPassword()))
-                .firstName(req.getFirstName())
-                .lastName(req.getLastName())
-                .role(UserRole.USER)
-                .build();
-
-        User saved = userRepository.save(u);
-        return ResponseEntity.created(URI.create("/api/users/" + saved.getId())).build();
     }
 
+    @Operation(summary = "Login a user", responses = {
+            @ApiResponse(responseCode = "200", description = "Login successful, JWT token set in cookie"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody RegisterRequest req, HttpServletResponse response) {
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
@@ -74,6 +72,7 @@ public class AuthController {
         return ResponseEntity.ok().body("ok");
     }
 
+    @Operation(summary = "Logout a user")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("VC_TOKEN", "");
