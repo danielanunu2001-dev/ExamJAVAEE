@@ -18,6 +18,7 @@ import com.voyageconnect.security.JwtAuthFilter;
 import com.voyageconnect.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -40,25 +41,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtil jwtUtil) throws Exception {
         http
-                .csrf().disable()
-                .cors().and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .cors(withDefaults()) // Uses the corsConfigurationSource bean by default
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/**",
-                             "/",
-                             "/index.html",
-                             "/static/**",
-                             "/public/**").permitAll()
+                    .requestMatchers("/api/auth/register", "/api/auth/login", "/", "/index.html", "/static/**", "/public/**").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )
-                ;
-
-        // JWT filter to parse token from Authorization header or cookie
-        http.addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-        // No HTTP Basic: only JWT (cookie or Bearer) accepted
+                .addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
